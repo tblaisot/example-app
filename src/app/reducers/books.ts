@@ -1,14 +1,16 @@
-import { createSelector } from 'reselect';
-import { Book } from '../models/book';
-import * as book from '../actions/book';
-import * as collection from '../actions/collection';
+import {createSelector} from "reselect";
+import {reducerWithInitialState, ReducerBuilder, SuccessFSAPayload} from "ngrx-store-fsa-helpers";
+import {Book} from "../models/book";
+import * as book from "../actions/book";
+import * as collection from "../actions/collection";
 
 
 export interface State {
   ids: string[];
   entities: { [id: string]: Book };
   selectedBookId: string | null;
-};
+}
+
 
 export const initialState: State = {
   ids: [],
@@ -16,56 +18,60 @@ export const initialState: State = {
   selectedBookId: null,
 };
 
-export function reducer(state = initialState, action: book.Actions | collection.Actions): State {
-  switch (action.type) {
-    case book.SEARCH_COMPLETE:
-    case collection.LOAD_SUCCESS: {
-      const books = action.payload;
-      const newBooks = books.filter(book => !state.entities[book.id]);
+const handleSearchBook = (state: State, {result}: SuccessFSAPayload<string, Book[]>): State => {
+  return handleLoadListBook(state, result);
+};
 
-      const newBookIds = newBooks.map(book => book.id);
-      const newBookEntities = newBooks.reduce((entities: { [id: string]: Book }, book: Book) => {
-        return Object.assign(entities, {
-          [book.id]: book
-        });
-      }, {});
+const handleLoadCollection = (state: State, {result}: SuccessFSAPayload<undefined, Book[]>): State => {
+  return handleLoadListBook(state, result);
+};
 
-      return {
-        ids: [ ...state.ids, ...newBookIds ],
-        entities: Object.assign({}, state.entities, newBookEntities),
-        selectedBookId: state.selectedBookId
-      };
-    }
+const handleLoadListBook = (state: State, books: Book[]): State => {
+  const newBooks = books.filter(book => !state.entities[book.id]);
 
-    case book.LOAD: {
-      const book = action.payload;
+  const newBookIds = newBooks.map(book => book.id);
+  const newBookEntities = newBooks.reduce((entities: { [id: string]: Book }, book: Book) => {
+    return Object.assign(entities, {
+      [book.id]: book
+    });
+  }, {});
 
-      if (state.ids.indexOf(book.id) > -1) {
-        return state;
-      }
+  return {
+    ids: [...state.ids, ...newBookIds],
+    entities: Object.assign({}, state.entities, newBookEntities),
+    selectedBookId: state.selectedBookId
+  };
 
-      return {
-        ids: [ ...state.ids, book.id ],
-        entities: Object.assign({}, state.entities, {
-          [book.id]: book
-        }),
-        selectedBookId: state.selectedBookId
-      };
-    }
+};
 
-    case book.SELECT: {
-      return {
-        ids: state.ids,
-        entities: state.entities,
-        selectedBookId: action.payload
-      };
-    }
+const handleLoadBook = (state: State, book: Book): State => {
 
-    default: {
-      return state;
-    }
+  if (state.ids.indexOf(book.id) > -1) {
+    return state;
   }
-}
+
+  return {
+    ids: [...state.ids, book.id],
+    entities: Object.assign({}, state.entities, {
+      [book.id]: book
+    }),
+    selectedBookId: state.selectedBookId
+  };
+};
+
+const handleSelectBook = (state: State, bookId: string): State => {
+  return {
+    ids: state.ids,
+    entities: state.entities,
+    selectedBookId: bookId
+  };
+};
+
+export const reducer: ReducerBuilder<State, State> = reducerWithInitialState(initialState)
+  .case(book.searchBookAction.done, handleSearchBook)
+  .case(collection.loadCollectionAction.done, handleLoadCollection)
+  .case(book.loadBookAction, handleLoadBook)
+  .case(book.selectBookAction, handleSelectBook);
 
 /**
  * Because the data structure is defined within the reducer it is optimal to

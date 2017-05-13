@@ -1,8 +1,8 @@
 import { reducer } from './books';
 import * as fromBooks from './books';
-import { SearchCompleteAction, LoadAction, SelectAction } from '../actions/book';
+import { searchBookAction, loadBookAction, selectBookAction } from '../actions/book';
 import { Book } from '../models/book';
-import { LoadSuccessAction } from '../actions/collection';
+import { loadCollectionAction } from '../actions/collection';
 
 describe('BooksReducer', () => {
   describe('undefined action', () => {
@@ -18,7 +18,7 @@ describe('BooksReducer', () => {
     function noExistingBooks(action) {
       const book1 = {id: '111'} as Book;
       const book2 = {id: '222'} as Book;
-      const createAction = new action([book1, book2]);
+      const createAction = action({result:[book1, book2]});
 
       const expectedResult = {
         ids: ['111', '222'],
@@ -47,7 +47,7 @@ describe('BooksReducer', () => {
       // should not replace existing books
       const differentBook2 = {id: '222', foo: 'bar'} as any;
       const book3 = {id: '333'} as Book;
-      const createAction = new action([book3, differentBook2]);
+      const createAction = action({result:[book3, differentBook2]});
 
       const expectedResult = {
         ids: ['111', '222', '333'],
@@ -64,20 +64,20 @@ describe('BooksReducer', () => {
     }
 
     it('should add all books in the payload when none exist', () => {
-      noExistingBooks(SearchCompleteAction);
-      noExistingBooks(LoadSuccessAction);
+      noExistingBooks(searchBookAction.done);
+      noExistingBooks(loadCollectionAction.done);
     });
 
     it('should add only new books when books already exist', () => {
-      existingBooks(SearchCompleteAction);
-      existingBooks(LoadSuccessAction);
+      existingBooks(searchBookAction.done);
+      existingBooks(loadCollectionAction.done);
     });
   });
 
   describe('LOAD', () => {
     it('should add a single book, if the book does not exist', () => {
       const book = {id: '888'} as Book;
-      const action = new LoadAction(book);
+      const action = loadBookAction(book);
 
       const expectedResult = {
         ids: ['888'],
@@ -99,7 +99,7 @@ describe('BooksReducer', () => {
         }
       } as any;
       const book = {id: '999', foo: 'baz'} as any;
-      const action = new LoadAction(book);
+      const action = loadBookAction(book);
 
       const result = reducer(initialState, action);
       expect(result).toEqual(initialState);
@@ -108,7 +108,7 @@ describe('BooksReducer', () => {
 
   describe('SELECT', () => {
     it('should set the selected book id on the state', () => {
-      const action = new SelectAction('1');
+      const action = selectBookAction('1');
 
       const result = reducer(fromBooks.initialState, action);
       expect(result.selectedBookId).toBe('1');

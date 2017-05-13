@@ -1,10 +1,9 @@
-import { Component, ChangeDetectionStrategy } from '@angular/core';
-import { Store } from '@ngrx/store';
-import { Observable } from 'rxjs/Observable';
-
-import * as fromRoot from '../reducers';
-import * as collection from '../actions/collection';
-import { Book } from '../models/book';
+import {Component, ChangeDetectionStrategy} from "@angular/core";
+import {Store} from "@ngrx/store";
+import {Observable} from "rxjs/Observable";
+import * as fromRoot from "../reducers";
+import * as collection from "../actions/collection";
+import {Book} from "../models/book";
 
 
 @Component({
@@ -29,10 +28,10 @@ export class SelectedBookPageComponent {
   }
 
   addToCollection(book: Book) {
-    this.store.dispatch(new collection.AddBookAction(book));
+    this.store.dispatch(collection.addBookToCollectionAction.started(book));
   }
 
   removeFromCollection(book: Book) {
-    this.store.dispatch(new collection.RemoveBookAction(book));
+    this.store.dispatch(collection.removeBookFromCollectionAction.started(book));
   }
 }

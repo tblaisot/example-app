@@ -1,4 +1,5 @@
-import * as layout from '../actions/layout';
+import {reducerWithInitialState, ReducerBuilder} from "ngrx-store-fsa-helpers";
+import * as layout from "../actions/layout";
 
 
 export interface State {
@@ -9,21 +10,16 @@ const initialState: State = {
   showSidenav: false,
 };
 
-export function reducer(state = initialState, action: layout.Actions): State {
-  switch (action.type) {
-    case layout.CLOSE_SIDENAV:
-      return {
-        showSidenav: false
-      };
-
-    case layout.OPEN_SIDENAV:
-      return {
-        showSidenav: true
-      };
-
-    default:
-      return state;
-  }
-}
+export const reducer: ReducerBuilder<State, State> = reducerWithInitialState(initialState)
+  .case(layout.openSidenavAction, (state: State): State => {
+    return {
+      showSidenav: true
+    };
+  })
+  .case(layout.closeSidenavAction, (state: State): State => {
+    return {
+      showSidenav: false
+    };
+  });
 
 export const getShowSidenav = (state: State) => state.showSidenav;

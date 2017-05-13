@@ -1,18 +1,17 @@
-import 'rxjs/add/operator/catch';
-import 'rxjs/add/operator/map';
-import 'rxjs/add/operator/switchMap';
-import 'rxjs/add/operator/debounceTime';
-import 'rxjs/add/operator/skip';
-import 'rxjs/add/operator/takeUntil';
-import { Injectable } from '@angular/core';
-import { Effect, Actions, toPayload } from '@ngrx/effects';
-import { Action } from '@ngrx/store';
-import { Observable } from 'rxjs/Observable';
-import { empty } from 'rxjs/observable/empty';
-import { of } from 'rxjs/observable/of';
-
-import { GoogleBooksService } from '../services/google-books';
-import * as book from '../actions/book';
+import "rxjs/add/operator/catch";
+import "rxjs/add/operator/map";
+import "rxjs/add/operator/switchMap";
+import "rxjs/add/operator/debounceTime";
+import "rxjs/add/operator/skip";
+import "rxjs/add/operator/takeUntil";
+import {Injectable} from "@angular/core";
+import {Effect, Actions, toPayload} from "@ngrx/effects";
+import {Action} from "@ngrx/store";
+import {Observable} from "rxjs/Observable";
+import {empty} from "rxjs/observable/empty";
+import {of} from "rxjs/observable/of";
+import {GoogleBooksService} from "../services/google-books";
+import * as book from "../actions/book";
 
 
 /**
@@ -37,7 +36,7 @@ export class BookEffects {
 
   @Effect()
   search$: Observable<Action> = this.actions$
-    .ofType(book.SEARCH)
+    .ofType(book.searchBookAction.started.type)
     .debounceTime(300)
     .map(toPayload)
     .switchMap(query => {
@@ -45,13 +44,14 @@ export class BookEffects {
         return empty();
       }
 
-      const nextSearch$ = this.actions$.ofType(book.SEARCH).skip(1);
+      const nextSearch$ = this.actions$.ofType(book.searchBookAction.started.type).skip(1);
 
       return this.googleBooks.searchBooks(query)
         .takeUntil(nextSearch$)
-        .map(books => new book.SearchCompleteAction(books))
-        .catch(() => of(new book.SearchCompleteAction([])));
+        .map(books => book.searchBookAction.done({params: query, result: books}))
+        .catch(() => of(book.searchBookAction.failed({params: query})));
     });
 
-    constructor(private actions$: Actions, private googleBooks: GoogleBooksService) { }
+  constructor(private actions$: Actions, private googleBooks: GoogleBooksService) {
+  }
 }

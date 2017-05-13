@@ -1,18 +1,7 @@
-import { Action } from '@ngrx/store';
-
-export const OPEN_SIDENAV =   '[Layout] Open Sidenav';
-export const CLOSE_SIDENAV =  '[Layout] Close Sidenav';
+import {actionCreatorFactory, ActionCreator} from "ngrx-store-fsa-helpers";
 
 
-export class OpenSidenavAction implements Action {
-  readonly type = OPEN_SIDENAV;
-}
+const actionCreator = actionCreatorFactory('[Layout]');
 
-export class CloseSidenavAction implements Action {
-  readonly type = CLOSE_SIDENAV;
-}
-
-
-export type Actions
-  = OpenSidenavAction
-  | CloseSidenavAction;
+export const openSidenavAction: ActionCreator<undefined> = actionCreator<undefined>('Open Sidenav');
+export const closeSidenavAction: ActionCreator<undefined> = actionCreator<undefined>('Close Sidenav');

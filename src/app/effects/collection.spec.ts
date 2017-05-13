@@ -48,9 +48,9 @@ describe('CollectionEffects', () => {
       const booksObservable = Observable.of(book1, book2);
       db.query.and.returnValue(booksObservable);
 
-      const expectedResult = new collection.LoadSuccessAction([book1, book2]);
+      const expectedResult = collection.loadCollectionAction.done({result:[book1, book2]});
 
-      runner.queue(new collection.LoadAction());
+      runner.queue(collection.loadCollectionAction.started());
 
       collectionEffects.loadCollection$.subscribe(result => {
         expect(result).toEqual(expectedResult);
@@ -63,9 +63,9 @@ describe('CollectionEffects', () => {
       const error = new Error('msg');
       db.query.and.returnValue(Observable.throw(error));
 
-      const expectedResult = new collection.LoadFailAction(error);
+      const expectedResult = collection.loadCollectionAction.failed({error:error});
 
-      runner.queue(new collection.LoadAction());
+      runner.queue(collection.loadCollectionAction.started());
 
       collectionEffects.loadCollection$.subscribe(result => {
         expect(result).toEqual(expectedResult);
@@ -80,9 +80,9 @@ describe('CollectionEffects', () => {
       const {db, runner, collectionEffects} = setup();
       db.insert.and.returnValue(Observable.of({}));
 
-      const expectedResult = new collection.AddBookSuccessAction(book);
+      const expectedResult = collection.addBookToCollectionAction.done({params:book});
 
-      runner.queue(new collection.AddBookAction(book));
+      runner.queue(collection.addBookToCollectionAction.started(book));
 
       collectionEffects.addBookToCollection$.subscribe(result => {
         expect(result).toEqual(expectedResult);
@@ -96,9 +96,9 @@ describe('CollectionEffects', () => {
       const {db, runner, collectionEffects} = setup();
       db.insert.and.returnValue(Observable.throw(new Error()));
 
-      const expectedResult = new collection.AddBookFailAction(book);
+      const expectedResult = collection.addBookToCollectionAction.failed({params:book});
 
-      runner.queue(new collection.AddBookAction(book));
+      runner.queue(collection.addBookToCollectionAction.started(book));
 
       collectionEffects.addBookToCollection$.subscribe(result => {
         expect(result).toEqual(expectedResult);
@@ -113,9 +113,9 @@ describe('CollectionEffects', () => {
         const {db, runner, collectionEffects} = setup();
         db.executeWrite.and.returnValue(Observable.of({}));
 
-        const expectedResult = new collection.RemoveBookSuccessAction(book);
+        const expectedResult = collection.removeBookFromCollectionAction.done({params:book});
 
-        runner.queue(new collection.RemoveBookAction(book));
+        runner.queue(collection.removeBookFromCollectionAction.started(book));
 
         collectionEffects.removeBookFromCollection$.subscribe(result => {
           expect(result).toEqual(expectedResult);
@@ -129,9 +129,9 @@ describe('CollectionEffects', () => {
         const {db, runner, collectionEffects} = setup();
         db.executeWrite.and.returnValue(Observable.throw(new Error()));
 
-        const expectedResult = new collection.RemoveBookFailAction(book);
+        const expectedResult = collection.removeBookFromCollectionAction.failed({params:book});
 
-        runner.queue(new collection.RemoveBookAction(book));
+        runner.queue(collection.removeBookFromCollectionAction.started(book));
 
         collectionEffects.removeBookFromCollection$.subscribe(result => {
           expect(result).toEqual(expectedResult);

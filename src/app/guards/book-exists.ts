@@ -1,19 +1,18 @@
-import 'rxjs/add/operator/take';
-import 'rxjs/add/operator/filter';
-import 'rxjs/add/operator/do';
-import 'rxjs/add/operator/map';
-import 'rxjs/add/operator/switchMap';
-import 'rxjs/add/operator/catch';
-import 'rxjs/add/operator/let';
-import { Injectable } from '@angular/core';
-import { Store } from '@ngrx/store';
-import { Router, CanActivate, ActivatedRouteSnapshot } from '@angular/router';
-import { Observable } from 'rxjs/Observable';
-import { of } from 'rxjs/observable/of';
-
-import { GoogleBooksService } from '../services/google-books';
-import * as fromRoot from '../reducers';
-import * as book from '../actions/book';
+import "rxjs/add/operator/take";
+import "rxjs/add/operator/filter";
+import "rxjs/add/operator/do";
+import "rxjs/add/operator/map";
+import "rxjs/add/operator/switchMap";
+import "rxjs/add/operator/catch";
+import "rxjs/add/operator/let";
+import {Injectable} from "@angular/core";
+import {Store, Action} from "@ngrx/store";
+import {Router, CanActivate, ActivatedRouteSnapshot} from "@angular/router";
+import {Observable} from "rxjs/Observable";
+import {of} from "rxjs/observable/of";
+import {GoogleBooksService} from "../services/google-books";
+import * as fromRoot from "../reducers";
+import * as book from "../actions/book";
 
 
 /**
@@ -23,11 +22,10 @@ import * as book from '../actions/book';
  */
 @Injectable()
 export class BookExistsGuard implements CanActivate {
-  constructor(
-    private store: Store<fromRoot.State>,
-    private googleBooks: GoogleBooksService,
-    private router: Router
-  ) { }
+  constructor(private store: Store<fromRoot.State>,
+              private googleBooks: GoogleBooksService,
+              private router: Router) {
+  }
 
   /**
    * This method creates an observable that waits for the `loaded` property
@@ -56,8 +54,8 @@ export class BookExistsGuard implements CanActivate {
    */
   hasBookInApi(id: string): Observable<boolean> {
     return this.googleBooks.retrieveBook(id)
-      .map(bookEntity => new book.LoadAction(bookEntity))
-      .do((action: book.LoadAction) => this.store.dispatch(action))
+      .map(bookEntity => book.loadBookAction(bookEntity))
+      .do((action: Action) => this.store.dispatch(action))
       .map(book => !!book)
       .catch(() => {
         this.router.navigate(['/404']);
